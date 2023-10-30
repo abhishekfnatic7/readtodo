@@ -1,76 +1,134 @@
-"use client"
-import { useRef, useState } from "react"
-import "./about.module.css"
+import React, { useState } from "react";
 import { v4 as uuid } from "uuid";
 import Stulist from "../Studlist";
-export default function page(){
-    const [firstname,setfirstname]=useState()
-    const [lasttname,setlastname]=useState()
-    const firstnamevalue=useRef('')
-    const lastnamevalue=useRef('')
-    const [list,setlist]=useState(Stulist)
-    
-    const idvalue=uuid();
-    const sliceid=idvalue.slice(0,4)
-    
-    const formsubmit=(events)=>{
-        events.preventDefault()
-        list.push({id:sliceid,firstname:firstnamevalue.current.value,lastname:lastnamevalue.current.value})
-        setfirstname('')
-        setlastname('')
-    }
-    const handledelete=(id)=>{
-    
-        let deleteval=list.filter((value)=>value.id!=id)
-        setlist(deleteval)
 
-    }
-    const handleEdit=(id)=>{
-        let data=list[id]
-        data.firstname="hello2"
-        console.log(data)
-        setlist([...list])
-    }
-    
-    return (
-        <div>
-            
-            <form onSubmit={formsubmit}>
-                <input type="text" placeholder="Enter First Name"  onChange={(e)=>setfirstname(e.target.value)} ref={firstnamevalue} />
-                <input type="text" placeholder="Enter Last Name" onChange={(e)=>setlastname(e.target.value)} ref={lastnamevalue} />
-                <button type="submit">Sumbit</button>
-            </form>
-         
-            <table>
-                <thead>
-                    <tr>
+export default function Page() {
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [list, setList] = useState(Stulist);
+  const [editItemId, setEditItemId] = useState(null);
 
-                    <th>Id</th>
-                    <th>Firstname</th>
-                    <th>Lastname</th>
-                    <th>Edit</th>
-                    <th>Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {list && list.length > 0 ? list.map((value,key)=>{
-                        return (<tr key={key}>
-                            <td>{value.id}</td>
-                            <td>{value.firstname}</td>
-                            <td>{value.lastname}</td>
-                            <td><button type="button" onClick={()=>handleEdit(key)}>Edit</button></td>
-                            <td><button type="button" onClick={()=>handledelete(value.id)}>Delete</button></td>
-                            </tr>
-                        )
-                        
-                    }):
-                    <h1>No data found</h1>
-                    
-                    }
-                   
-                </tbody>
-            </table>
-           
-        </div>
-    )
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+    const idValue = uuid();
+    const sliceId = idValue.slice(0, 4);
+    const newItem = {
+      id: sliceId,
+      firstname: firstname,
+      lastname: lastname,
+    };
+    setList([...list, newItem]);
+    setFirstname("");
+    setLastname("");
+  };
+
+  const handleDelete = (id) => {
+    const updatedList = list.filter((item) => item.id !== id);
+    setList(updatedList);
+  };
+
+  const handleEdit = (id) => {
+    setEditItemId(id);
+  };
+
+  const handleSave = (id) => {
+    const updatedList = list.map((item) => {
+      if (item.id === id) {
+        return {
+          ...item,
+          firstname: firstname,
+          lastname: lastname,
+        };
+      }
+      return item;
+    });
+    setList(updatedList);
+    setEditItemId(null);
+    setFirstname("");
+    setLastname("");
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleFormSubmit}>
+        <input
+          type="text"
+          placeholder="Enter First Name"
+          value={firstname}
+          onChange={(e) => setFirstname(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Enter Last Name"
+          value={lastname}
+          onChange={(e) => setLastname(e.target.value)}
+        />
+        <button type="submit">Submit</button>
+      </form>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Firstname</th>
+            <th>Lastname</th>
+            <th>Edit</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {list.length > 0 ? (
+            list.map((item) => (
+              <tr key={item.id}>
+                <td>{item.id}</td>
+                <td>
+                  {editItemId === item.id ? (
+                    <input
+                      type="text"
+                      value={firstname}
+                      onChange={(e) => setFirstname(e.target.value)}
+                    />
+                  ) : (
+                    item.firstname
+                  )}
+                </td>
+                <td>
+                  {editItemId === item.id ? (
+                    <input
+                      type="text"
+                      value={lastname}
+                      onChange={(e) => setLastname(e.target.value)}
+                    />
+                  ) : (
+                    item.lastname
+                  )}
+                </td>
+                <td>
+                  {editItemId === item.id ? (
+                    <button type="button" onClick={() => handleSave(item.id)}>
+                      Save
+                    </button>
+                  ) : (
+                    <button type="button" onClick={() => handleEdit(item.id)}>
+                      Edit
+                    </button>
+                  )}
+                </td>
+                <td>
+                  <button type="button" onClick={() => handleDelete(item.id)}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5">No data found</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
 }
+
